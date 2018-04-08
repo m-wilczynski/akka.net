@@ -96,6 +96,18 @@ Routers are implemented as actors, so a router is supervised by it's parent, and
 
 By default, pool routers use a custom strategy that only returns `Escalate` for all exceptions, the router supervising the failing worker will then escalate to it's own parent, if the parent of the router decides to restart the router, all the pool workers will also be recreated as a result of this.
 
+## Sending messages to actors behind router
+
+As routers are actors, we send over messages to actors they manage the same way we communicate to other actors via `ActorRef`:
+
+```cs
+IActorRef router = system.ActorOf(Props.Create<Worker>().WithRouter(new RoundRobinPool(3)), "some-pool");
+router.Tell(new Message());
+```
+
+Router will send over messages according to its strategy.
+In this particular case, we have `RoundRobinPool` configuration that will create 3 instances (because it's Pool strategy - see above) of `Worker` actor and will enqueue `Message` to its **Mailboxes** according to its RoundRobin routing strategy.
+
 ## Routing Strategies
 
 These are the routing strategies provided by Akka.NET out of the box.
