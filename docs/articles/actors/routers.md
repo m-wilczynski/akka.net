@@ -102,11 +102,18 @@ As routers are actors, we send over messages to actors they manage the same way 
 
 ```cs
 IActorRef router = system.ActorOf(Props.Create<Worker>().WithRouter(new RoundRobinPool(3)), "some-pool");
-router.Tell(new Message());
+foreach (var element in Enumerable.Range(0, 6))
+{
+  router.Tell(new Message(element));
+}
 ```
 
 Router will send over messages according to its strategy.
-In this particular case, we have `RoundRobinPool` configuration that will create 3 instances (because it's Pool strategy - see above) of `Worker` actor and will enqueue `Message` to its **Mailboxes** according to its RoundRobin routing strategy.
+In this particular case, we have `RoundRobinPool` configuration that will:
+* create 3 instances (because it's Pool strategy - see above) of `Worker` actor 
+* enqueue total of 6 messages of type `Message` to actors **mailboxes** it manages according to its RoundRobin routing strategy
+
+Total outcome should be 2 messages per each actor's mailbox (see how RoundRobin strategy works below).
 
 ## Routing Strategies
 
